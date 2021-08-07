@@ -2,55 +2,49 @@ import { Layout, Menu } from 'antd';
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import UstaraLogo from '../assets/ustralogo.png';
 import { Category } from './Category';
 import { ProductList } from './ProductList';
+import { GlobalContext } from '../Provider/GlobalContext';
 const { Header, Sider, Content } = Layout;
 
-class SideBar extends React.Component {
-  state = {
-    collapsed: false,
-  };
+export const SideBar = () => {
+  const context = useContext(GlobalContext);
+  const [collapsed, setCollapsed] = useState(false);
 
-  toggle = () => {
-    this.setState({
-      collapsed: !this.state.collapsed,
-    });
+  const getSelectedItemIndex = () => {
+    const categories = context.categories || [];
+    const selectedCategory = context.category;
+    return categories.findIndex(category => selectedCategory.category_id === category.category_id);
+  }
+  const toggle = () => {
+    setCollapsed(!collapsed);
   };
-
-  render() {
+  const onChangeFromMenu = (category) => {
+    context.setCategory(category);
+  }
     return (
       <Layout>
-        <Sider trigger={null} collapsible collapsed={this.state.collapsed} style={{backgroundColor: "#fff"}}>
+        <Sider trigger={null} collapsible collapsed={collapsed} style={{backgroundColor: "#fff"}}>
           <img className="logo" src={UstaraLogo} alt="ustara-logo" style={{width: "60px", height: "60px"}}/>
-          <Menu mode="inline" defaultSelectedKeys={['1']}>
-            <Menu.Item key="1" icon={<UserOutlined />}>
-              Face And Body
-            </Menu.Item>
-            <Menu.Item key="2" icon={<VideoCameraOutlined />}>
-              Hair
-            </Menu.Item>
-            <Menu.Item key="3" icon={<UploadOutlined />}>
-              Skin
-            </Menu.Item>
-            <Menu.Item key="4" icon={<UploadOutlined />}>
-              Shave
-            </Menu.Item>
-            <Menu.Item key="5" icon={<UploadOutlined />}>
-              Featured Bundle
-            </Menu.Item>
+          <Menu mode="inline" defaultSelectedKeys={['0']} selectedKeys={[String(getSelectedItemIndex())]}>
+            {context.categories.map((category, index) => {
+              return (
+                <Menu.Item key={index} icon={<UploadOutlined />} onClick={() => onChangeFromMenu(category)}>
+                  {category.category_name}
+                </Menu.Item>
+              )
+            })}
           </Menu>
         </Sider>
         <Layout className="site-layout">
           <Header className="site-layout-background" style={{ padding: 0 }}>
-            {React.createElement(this.state.collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+            {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
               className: 'trigger',
-              onClick: this.toggle,
+              onClick: toggle,
             })}
           </Header>
           <Content
@@ -67,6 +61,4 @@ class SideBar extends React.Component {
         </Layout>
       </Layout>
     );
-  }
 }
-export default SideBar;
